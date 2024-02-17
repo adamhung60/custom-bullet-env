@@ -73,7 +73,7 @@
         <parent link="body" />
         <child link="w1" />
         <axis xyz="0 0 1" />
-        <limit effort="500" velocity="20" />
+        <limit effort="1000" velocity="1000" />
         <joint_properties friction="0.0" />
     </joint>
 
@@ -112,7 +112,7 @@
         <parent link="body" />
         <child link="w2" />
         <axis xyz="0 0 1" />
-        <limit effort="500" velocity="20" />
+        <limit effort="1000" velocity="1000" />
         <joint_properties friction="0.0" />
     </joint>
 

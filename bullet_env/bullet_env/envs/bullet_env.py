@@ -15,7 +15,6 @@ class BulletEnv(gym.Env):
         self.steps_taken = 0
         self.healthy_z_range = [0.12,1.0]
         self.joints = [1, 2]
-        self.forces = [500, 500]
         self.prev_pos = 0
         self.render_mode = render_mode
         if self.render_mode == "human":
@@ -75,14 +74,15 @@ class BulletEnv(gym.Env):
         return observation, info
     
     def step(self, action):
-        action = action*20
+        action = action*5
         #print(action)
+        p.setJointMotorControlArray(self.robot,self.joints, controlMode=p.VELOCITY_CONTROL, forces = [0,0])
         p.setJointMotorControlArray(
             bodyUniqueId = self.robot, 
             jointIndices = self.joints, 
-            controlMode = p.VELOCITY_CONTROL, 
-            targetVelocities = [action, -action], 
-            forces = self.forces)
+            controlMode = p.TORQUE_CONTROL, 
+            forces = [action, -action])
+        
         p.stepSimulation()
         #print(action)
         self.steps_taken += 1
@@ -131,6 +131,7 @@ class BulletEnv(gym.Env):
             image = np.array(p.getCameraImage(h, w)[2]).reshape(h,w,4)
             image = image[:, :, :3]
             image = cv2.convertScaleAbs(image)
+            
             return image
             
             # We need to ensure that human-rendering occurs at the predefined framerate.
