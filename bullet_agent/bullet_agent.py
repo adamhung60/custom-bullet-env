@@ -51,5 +51,5 @@ def test(eps):
     print("mean reward: ", mean_reward)
         
 if __name__ == '__main__':
-    train(1e5)
+    #train(1e5)
     test(5)

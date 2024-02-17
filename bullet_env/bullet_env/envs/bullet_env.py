@@ -28,7 +28,7 @@ class BulletEnv(gym.Env):
         p.resetSimulation()
 
         # y displacement (green), z displacement (blue)
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(8,), dtype=float)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(10,), dtype=float)
         # left wheel, right wheel
         self.action_space = spaces.Box(low=-1, high=1, shape=(1,), dtype=float)
 
@@ -38,7 +38,8 @@ class BulletEnv(gym.Env):
         y,z = p.getLinkState(self.robot, 0)[0][1:3]
         orientation = p.getLinkState(self.robot, 0)[1]
         joint_pos =  [p.getJointState(self.robot, 1)[0], p.getJointState(self.robot, 2)[0]]
-        return np.array([y, z, orientation[0], orientation[1], orientation[2], orientation[3], joint_pos[0], joint_pos[1]])
+        joint_vel =  [p.getJointState(self.robot, 1)[1], p.getJointState(self.robot, 2)[1]]
+        return np.array([y, z, orientation[0], orientation[1], orientation[2], orientation[3], joint_pos[0], joint_pos[1], joint_vel[0], joint_vel[1]])
     
     def is_dead(self):
         z = p.getLinkState(self.robot,0)[0][2]
