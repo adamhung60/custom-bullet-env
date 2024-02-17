@@ -1,0 +1,120 @@
+<robot name="onshape">
+    <link name="body">
+        <visual>
+            <origin xyz="7.5291817533715583983e-18 0.044999999999999998335 -0.015000000000000041078"
+                rpy="0 -0 0" />
+            <geometry>
+                <mesh filename="package:///body.stl" />
+            </geometry>
+            <material name="body_material">
+                <color
+                    rgba="0.61568627450980395466 0.81176470588235294379 0.92941176470588238168 1.0" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="7.5291817533715583983e-18 0.044999999999999998335 -0.015000000000000041078"
+                rpy="0 -0 0" />
+            <geometry>
+                <mesh filename="package:///body.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="2.6794437691525560003e-17 0 -0.015000000000000049752" rpy="0 0 0" />
+            <mass value="10.665603242416230145" />
+            <inertia ixx="0.085373744488226557814" ixy="0" ixz="5.7013295916349994492e-50"
+                iyy="0.097785943070099870522" iyz="0" izz="0.026337007680809775695" />
+        </inertial>
+    </link>
+
+    <link name="top">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <mass value="1e-9" />
+            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+        </inertial>
+    </link>
+    <joint name="top_frame" type="fixed">
+        <origin xyz="0 0 0.150748" rpy="0 -0 0" />
+        <parent link="body" />
+        <child link="top" />
+        <axis xyz="0 0 0" />
+    </joint>
+
+    <link name="w1">
+        <visual>
+            <origin xyz="0.044999999999999998335 0.11999999999999999556 0.074999999999999983347"
+                rpy="-1.570796326794896558 -1.570796326794896336 0" />
+            <geometry>
+                <mesh filename="package:///w1.stl" />
+            </geometry>
+            <material name="w1_material">
+                <color
+                    rgba="0.64705882352941179736 0.64705882352941179736 0.64705882352941179736 1.0" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0.044999999999999998335 0.11999999999999999556 0.074999999999999983347"
+                rpy="-1.570796326794896558 -1.570796326794896336 0" />
+            <geometry>
+                <mesh filename="package:///w1.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="-6.9388939039072283776e-18 0 -0.014999999999999999445" rpy="0 0 0" />
+            <mass value="1.4313881527918503878" />
+            <inertia ixx="0.0021202437013229285048" ixy="0" ixz="0" iyy="0.0021202437013229293722"
+                iyz="-3.9666925544332529433e-19" izz="0.0040257791797270806033" />
+        </inertial>
+    </link>
+
+    <joint name="w1" type="revolute">
+        <origin xyz="-0.074999999999999941713 0 -0.13500000000000006439"
+            rpy="1.570796326794896336 -0 1.570796326794896558" />
+        <parent link="body" />
+        <child link="w1" />
+        <axis xyz="0 0 1" />
+        <limit effort="500" velocity="20" />
+        <joint_properties friction="0.0" />
+    </joint>
+
+    <link name="w2">
+        <visual>
+            <origin xyz="0.045000000000000012212 -0.12000000000000002331 0.074999999999999983347"
+                rpy="1.570796326794896558 1.570796326794896336 0" />
+            <geometry>
+                <mesh filename="package:///w2.stl" />
+            </geometry>
+            <material name="w2_material">
+                <color
+                    rgba="0.64705882352941179736 0.64705882352941179736 0.64705882352941179736 1.0" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0.045000000000000012212 -0.12000000000000002331 0.074999999999999983347"
+                rpy="1.570796326794896558 1.570796326794896336 0" />
+            <geometry>
+                <mesh filename="package:///w2.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin
+                xyz="6.9388939039072283776e-18 -2.7755575615628913511e-17 -0.014999999999999999445"
+                rpy="0 0 0" />
+            <mass value="1.4313881527918503878" />
+            <inertia ixx="0.0021202437013229285048" ixy="0" ixz="0" iyy="0.0021202437013229293722"
+                iyz="3.9666925544332529433e-19" izz="0.0040257791797270806033" />
+        </inertial>
+    </link>
+
+    <joint name="w2" type="revolute">
+        <origin xyz="0.075000000000000052736 1.3877787807814456755e-17 -0.13500000000000000888"
+            rpy="-1.57079632679489678 -0 1.570796326794896558" />
+        <parent link="body" />
+        <child link="w2" />
+        <axis xyz="0 0 1" />
+        <limit effort="500" velocity="20" />
+        <joint_properties friction="0.0" />
+    </joint>
+
+
+</robot>
