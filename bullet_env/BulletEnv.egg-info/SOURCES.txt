@@ -1,8 +1,0 @@
-setup.py
-BulletEnv.egg-info/PKG-INFO
-BulletEnv.egg-info/SOURCES.txt
-BulletEnv.egg-info/dependency_links.txt
-BulletEnv.egg-info/top_level.txt
-bullet_env/__init__.py
-bullet_env/envs/__init__.py
-bullet_env/envs/bullet_env.py

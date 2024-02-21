@@ -1,3 +1,5 @@
+#https://github.com/optuna/optuna-examples/blob/main/rl/sb3_simple.py
+
 from typing import Any
 from typing import Dict
 
@@ -10,59 +12,66 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
 import torch
 import torch.nn as nn
-import bullet_env
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
+from stable_baselines3.common.callbacks import EvalCallback
+import tt_env
+import numpy as np
+from optuna.visualization import plot_contour
 
-
-
-N_TRIALS = 100
+N_TRIALS = 50
 N_STARTUP_TRIALS = 5
 N_EVALUATIONS = 2
-N_TIMESTEPS = int(2e4)
+N_TIMESTEPS = int(1e5)
 EVAL_FREQ = int(N_TIMESTEPS / N_EVALUATIONS)
-N_EVAL_EPISODES = 3
+N_EVAL_EPISODES = 5
 
-ENV_ID = "Bullet"
+ENV_ID = "TT"
 
 DEFAULT_HYPERPARAMS = {
     "policy": "MlpPolicy",
-    "env": ENV_ID,
+#    "env": ENV_ID,
 }
 
 
 def sample_ppo_params(trial: optuna.Trial) -> Dict[str, Any]:
 
+    
+    learning_rate = trial.suggest_float("lr", 1e-7, 1e-2, log=True)
+    #n_steps = 2 ** trial.suggest_int("exponent_n_steps", 5, 15)
+    #batch_size = 2 ** trial.suggest_int("exponent_batch_size", 1, np.log2(n_steps))
+    #n_epochs = trial.suggest_int("epochs", 1, 30)
     gamma = 1.0 - trial.suggest_float("gamma", 0.0001, 0.1, log=True)
-    max_grad_norm = trial.suggest_float("max_grad_norm", 0.3, 5.0, log=True)
     gae_lambda = 1.0 - trial.suggest_float("gae_lambda", 0.001, 0.2, log=True)
-    n_steps = 2 ** trial.suggest_int("exponent_n_steps", 3, 10)
-    learning_rate = trial.suggest_float("lr", 1e-6, 1e-2, log=True)
+    clip_range = trial.suggest_float("clip_range", 0.1, 0.5)
+    max_grad_norm = trial.suggest_float("max_grad_norm", 0.3, 5.0, log=True)
     ent_coef = trial.suggest_float("ent_coef", 0.00000001, 0.1, log=True)
-    ortho_init = trial.suggest_categorical("ortho_init", [False, True])
+
     net_arch = trial.suggest_categorical("net_arch", ["tiny", "small"])
     activation_fn = trial.suggest_categorical("activation_fn", ["tanh", "relu"])
 
-    # Display true values.
+    """# Display true values.
     trial.set_user_attr("gamma_", gamma)
     trial.set_user_attr("gae_lambda_", gae_lambda)
-    trial.set_user_attr("n_steps", n_steps)
+    trial.set_user_attr("n_steps", n_steps)"""
 
-    net_arch = [
-        {"pi": [64], "vf": [64]} if net_arch == "tiny" else {"pi": [64, 64], "vf": [64, 64]}
-    ]
+
+    net_arch = {"pi": [64], "vf": [64]} if net_arch == "tiny" else {"pi": [64, 64], "vf": [64, 64]}
 
     activation_fn = {"tanh": nn.Tanh, "relu": nn.ReLU}[activation_fn]
 
     return {
-        "n_steps": n_steps,
+        "learning_rate": learning_rate,
+        #"n_steps": n_steps,
+        #"batch_size": batch_size,
+        #"n_epochs": n_epochs,
         "gamma": gamma,
         "gae_lambda": gae_lambda,
-        "learning_rate": learning_rate,
-        "ent_coef": ent_coef,
+        "clip_range": clip_range,
         "max_grad_norm": max_grad_norm,
+        "ent_coef": ent_coef,
         "policy_kwargs": {
             "net_arch": net_arch,
             "activation_fn": activation_fn,
-            "ortho_init": ortho_init,
         },
     }
 
@@ -106,13 +115,19 @@ def objective(trial: optuna.Trial) -> float:
     kwargs = DEFAULT_HYPERPARAMS.copy()
     # Sample hyperparameters.
     kwargs.update(sample_ppo_params(trial))
-    # Create the RL model.
-    model = PPO(**kwargs)
     # Create env used for evaluation.
     eval_env = Monitor(gymnasium.make(ENV_ID))
+    eval_vec_env = DummyVecEnv([lambda: eval_env])
+    eval_vec_env = VecNormalize(eval_vec_env, 
+                              training=True, 
+                              norm_obs=True, 
+                              norm_reward=False, 
+                              )
+    # Create the RL model.
+    model = PPO(env = eval_vec_env, **kwargs)
     # Create the callback that will periodically evaluate and report the performance.
     eval_callback = TrialEvalCallback(
-        eval_env, trial, n_eval_episodes=N_EVAL_EPISODES, eval_freq=EVAL_FREQ, deterministic=True
+        eval_vec_env, trial, n_eval_episodes=N_EVAL_EPISODES, eval_freq=EVAL_FREQ, deterministic=True
     )
 
     nan_encountered = False
@@ -143,7 +158,7 @@ if __name__ == "__main__":
 
     study = optuna.create_study(sampler=sampler, pruner=pruner, direction="maximize")
     try:
-        study.optimize(objective, n_trials=N_TRIALS, timeout=600)
+        study.optimize(objective, n_trials=N_TRIALS)
     except KeyboardInterrupt:
         pass
 
@@ -161,3 +176,5 @@ if __name__ == "__main__":
     print("  User attrs:")
     for key, value in trial.user_attrs.items():
         print("    {}: {}".format(key, value))
+
+    plot_contour(study)
